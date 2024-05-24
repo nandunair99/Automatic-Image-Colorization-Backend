@@ -7,6 +7,8 @@ import base64
 from io import BytesIO
 from PIL import Image  # for image processing (optional)
 
+from model import ResponseDTO
+
 app = FastAPI()
 
 
@@ -42,11 +44,12 @@ async def upload_file(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/file/upload2")
-async def upload_file():
-    data=""
+@app.post("/file/upload2", response_model=ResponseDTO)
+async def upload_file(image:Image):
+
     try:
-        decoded_bytes = base64.b64decode(data)
+        print(image.base64_string)
+        decoded_bytes = base64.b64decode(image.base64_string)
         decoded_io = BytesIO(decoded_bytes)
         img = Image.open(decoded_io)  # Assuming image data is encoded correctly
         # You can process the image further here
