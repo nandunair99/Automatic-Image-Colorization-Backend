@@ -1,5 +1,5 @@
-from fastapi import FastAPI
 from pydantic import BaseModel
 
-class ResponseModel(BaseModel):
+
+class ResponseDTO(BaseModel):
     message: str
