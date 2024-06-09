@@ -21,7 +21,7 @@ async def upload_file(image: ImageDTO) -> ResponseDTO:
     # You can process the image further here
     responseDTO = ResponseDTO(
         message="Image parsed successfully",
-        content=image.base64_string,
+        processed_image=image.base64_string,
         status_code = 200
     )
     return responseDTO
