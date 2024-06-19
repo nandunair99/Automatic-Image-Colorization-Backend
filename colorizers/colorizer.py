@@ -38,28 +38,28 @@ class Colorizer:
 
         # plt.imsave('%s_eccv16.png' % "new_eccv", out_img_eccv16)
         # plt.imsave('%s_siggraph17.png' % "new_siggraph", out_img_siggraph17)
+#Below is the sample to check which image holds good
+        # plt.figure(figsize=(12, 8))
+        # plt.subplot(2, 2, 1)
+        # plt.imshow(img)
+        # plt.title('Original')
+        # plt.axis('off')
 
-        plt.figure(figsize=(12, 8))
-        plt.subplot(2, 2, 1)
-        plt.imshow(img)
-        plt.title('Original')
-        plt.axis('off')
+        # plt.subplot(2, 2, 2)
+        # plt.imshow(img_bw)
+        # plt.title('Input')
+        # plt.axis('off')
 
-        plt.subplot(2, 2, 2)
-        plt.imshow(img_bw)
-        plt.title('Input')
-        plt.axis('off')
+        # plt.subplot(2, 2, 3)
+        # plt.imshow(out_img_eccv16)
+        # plt.title('Output (ECCV 16)')
+        # plt.axis('off')
 
-        plt.subplot(2, 2, 3)
-        plt.imshow(out_img_eccv16)
-        plt.title('Output (ECCV 16)')
-        plt.axis('off')
-
-        plt.subplot(2, 2, 4)
-        plt.imshow(out_img_siggraph17)
-        plt.title('Output (SIGGRAPH 17)')
-        plt.axis('off')
-        plt.show()
+        # plt.subplot(2, 2, 4)
+        # plt.imshow(out_img_siggraph17)
+        # plt.title('Output (SIGGRAPH 17)')
+        # plt.axis('off')
+        # plt.show()
 
         return color_image
 
@@ -134,14 +134,17 @@ class Colorizer:
         torch.save(colorizer_eccv16.state_dict(), 'fine_tuned_colorizer_eccv16.pth')
         torch.save(colorizer_siggraph17.state_dict(), 'fine_tuned_colorizer_siggraph17.pth')
 
-    def generateBase64String(self,img_rgb):
+    def generateBase64String(self, img_rgb):
         # Convert to PIL Image
         img_pil = Image.fromarray((img_rgb * 255).astype(np.uint8))
 
-        # Save image to a bytes buffer
+        # Save image to a bytes buffer in JPEG format
         buffer = io.BytesIO()
-        img_pil.save(buffer, format="PNG")
+        img_pil.save(buffer, format="JPEG")  # Save as JPEG
         img_str = base64.b64encode(buffer.getvalue()).decode()
+
+        # Add prefix to JPEG base64 string
+        img_str = "data:image/jpeg;base64," + img_str
 
         return img_str
 
