@@ -1,7 +1,12 @@
 from colorizers import *
 import matplotlib.pyplot as plt
-from os import listdir
+import torch.optim as optim
 import io
+from torchvision import transforms
+from torch.utils.data import Dataset, DataLoader
+
+from colorizers.ColorizationDataset import ColorizationDataset
+
 
 class Colorizer:
     def __init__(self, greyscale_image):
@@ -59,11 +64,75 @@ class Colorizer:
         return color_image
 
     def train_model(self):
-        progress = 0
+        # load colorizers
+        colorizer_eccv16 = eccv16(pretrained=True).eval()
+        colorizer_siggraph17 = siggraph17(pretrained=True).eval()
 
-        for file in listdir('image_store/train'):
-            img_path = 'image_store/train' + file
-            img = load_img(img_path)
+        # Freeze all parameters initially
+        for param in colorizer_eccv16.parameters():
+            param.requires_grad = False
+
+        # Unfreeze specific layers of ECCV16 for fine-tuning
+        for param in colorizer_eccv16.model8.parameters():
+            param.requires_grad = True
+
+        # Freeze all parameters initially
+        for param in colorizer_siggraph17.parameters():
+            param.requires_grad = False
+
+        # Unfreeze specific layers of SIGGRAPH17 for fine-tuning
+        for param in colorizer_siggraph17.model8.parameters():
+            param.requires_grad = True
+
+        # Define the Mean Squared Error (MSE) loss function
+        criterion = nn.MSELoss()
+
+        # Set up optimizers for both models, but only for the parameters that require gradients
+        optimizer_eccv16 = optim.Adam(filter(lambda p: p.requires_grad, colorizer_eccv16.parameters()), lr=0.001)
+        optimizer_siggraph17 = optim.Adam(filter(lambda p: p.requires_grad, colorizer_siggraph17.parameters()),
+                                          lr=0.001)
+
+        transform = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Resize((256, 256)),
+        ])
+
+        dataset = ColorizationDataset('./image_store/train', transform=transform)
+        dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
+
+        # Number of epochs to train the model
+        num_epochs = 10
+        for epoch in range(num_epochs):
+            # Set both models to training mode
+            colorizer_eccv16.train()
+            colorizer_siggraph17.train()
+
+            # Iterate over batches of data
+            for L, ab in dataloader:
+                L = L.unsqueeze(1)  # Add channel dimension to L channel (NxHxW -> Nx1xHxW)
+                ab = ab.permute(0, 3, 1, 2)  # Change dimension order of ab channels (NxHxWx2 -> Nx2xHxW)
+
+                # Fine-tuning ECCV16 model
+                #optimizer_eccv16.zero_grad()  # Clear gradients for ECCV16 optimizer
+                output_ab_eccv16 = colorizer_eccv16(L)  # Forward pass through ECCV16
+                loss_eccv16 = criterion(output_ab_eccv16, ab)  # Compute loss for ECCV16
+                loss_eccv16.backward()  # Backward pass to compute gradients
+                optimizer_eccv16.step()  # Update ECCV16 parameters
+
+                # Fine-tuning SIGGRAPH17 model
+                optimizer_siggraph17.zero_grad()  # Clear gradients for SIGGRAPH17 optimizer
+                output_ab_siggraph17 = colorizer_siggraph17(L)  # Forward pass through SIGGRAPH17
+                loss_siggraph17 = criterion(output_ab_siggraph17, ab)  # Compute loss for SIGGRAPH17
+                loss_siggraph17.backward()  # Backward pass to compute gradients
+                optimizer_siggraph17.step()  # Update SIGGRAPH17 parameters
+
+            # Print the loss for both models at the end of each epoch
+            print(
+                f'Epoch [{epoch + 1}/{num_epochs}], Loss ECCV16: {loss_eccv16.item():.4f}, Loss SIGGRAPH17: {loss_siggraph17.item():.4f}')
+
+        # Save the fine-tuned models' weights
+        torch.save(colorizer_eccv16.state_dict(), 'fine_tuned_colorizer_eccv16.pth')
+        torch.save(colorizer_siggraph17.state_dict(), 'fine_tuned_colorizer_siggraph17.pth')
 
     def generateBase64String(self,img_rgb):
         # Convert to PIL Image

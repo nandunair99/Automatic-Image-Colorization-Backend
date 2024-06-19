@@ -22,3 +22,14 @@ async def upload_file(image: ImageDTO) -> ResponseDTO:
         status_code=200
     )
     return responseDTO
+
+@router.post("/train", status_code=200, response_model=ResponseDTO)
+async def train_model(image: ImageDTO) -> ResponseDTO:
+    c1 = Colorizer(image.greyscale_image)
+    c1.train_model()
+    # You can process the image further here
+    responseDTO = ResponseDTO(
+        message="Model trained successfully",
+        status_code=200
+    )
+    return responseDTO

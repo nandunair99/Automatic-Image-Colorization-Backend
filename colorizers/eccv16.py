@@ -99,7 +99,7 @@ class ECCVGenerator(BaseColor):
 
 
 def eccv16(pretrained=False):
-    local_path = "C:\\Users\\nandu\\PycharmProjects\\CV\\colorization\\colorization_release_v2-9b330a0b.pth"
+    local_path = "E:\\PycharmProjects\\CV\\colorization\\colorization_release_v2-9b330a0b.pth"
     model = ECCVGenerator()
     if (pretrained):
         import torch.utils.model_zoo as model_zoo
