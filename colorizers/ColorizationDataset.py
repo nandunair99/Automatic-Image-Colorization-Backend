@@ -3,6 +3,7 @@ import os
 from skimage import io, color
 from PIL import Image
 
+
 class ColorizationDataset(Dataset):
     def __init__(self, image_dir, transform=None):
         self.image_dir = image_dir
@@ -33,4 +34,4 @@ class ColorizationDataset(Dataset):
         tens_l = image_lab[:, :, 0]
         # Extract the AB channels (color channels)
         tens_ab = image_lab[:, :, 1:]
-        return tens_l,tens_ab
+        return tens_l, tens_ab

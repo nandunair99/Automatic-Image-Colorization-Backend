@@ -9,13 +9,13 @@ from colorizers.ColorizationDataset import ColorizationDataset
 
 
 class Colorizer:
-    def __init__(self, greyscale_image):
-        self.greyscale_image = greyscale_image
+    def __init__(self, greyscale_image=None):
+        if greyscale_image:
+            self.greyscale_image = greyscale_image
 
     def colorize(self):
         # load colorizers
         colorizer_eccv16 = eccv16(pretrained=True).eval()
-
 
         # default size to process images is 256x256
         # grab L channel in both original ("orig") and resized ("rs") resolutions
@@ -39,7 +39,6 @@ class Colorizer:
         # Unfreeze specific layers of ECCV16 for fine-tuning
         for param in colorizer_eccv16.model8.parameters():
             param.requires_grad = True
-
 
         # Define the Mean Squared Error (MSE) loss function
         criterion = nn.CrossEntropyLoss()
@@ -67,7 +66,7 @@ class Colorizer:
                 ab = ab.permute(0, 3, 1, 2)  # Change dimension order of ab channels (NxHxWx2 -> Nx2xHxW)
 
                 # Fine-tuning ECCV16 model
-                #optimizer_eccv16.zero_grad()  # Clear gradients for ECCV16 optimizer
+                # optimizer_eccv16.zero_grad()  # Clear gradients for ECCV16 optimizer
                 output_ab_eccv16 = colorizer_eccv16(L)  # Forward pass through ECCV16
                 loss_eccv16 = criterion(output_ab_eccv16, ab)  # Compute loss for ECCV16
                 loss_eccv16.backward()  # Backward pass to compute gradients
@@ -93,4 +92,3 @@ class Colorizer:
         img_str = "data:image/jpeg;base64," + img_str
 
         return img_str
-

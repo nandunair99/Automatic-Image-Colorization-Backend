@@ -13,9 +13,9 @@ router = APIRouter(
 
 @router.post("/upload", status_code=200, response_model=ResponseDTO)
 async def upload_file(image: ImageDTO) -> ResponseDTO:
-    #pdb.set_trace()
+    # pdb.set_trace()
     c1 = Colorizer(image.greyscale_image)
-    color_image=c1.colorize()
+    color_image = c1.colorize()
     # You can process the image further here
     responseDTO = ResponseDTO(
         message="Image parsed successfully",
@@ -24,14 +24,14 @@ async def upload_file(image: ImageDTO) -> ResponseDTO:
     )
     return responseDTO
 
+
 @router.post("/train", status_code=200, response_model=ResponseDTO)
-async def train_model(image: ImageDTO) -> ResponseDTO:
-    c1 = Colorizer(image.greyscale_image)
+async def train_model() -> ResponseDTO:
+    c1 = Colorizer()
     c1.train_model()
     # You can process the image further here
     responseDTO = ResponseDTO(
         message="Model trained successfully",
-        processed_image="hahaha",
         status_code=200
     )
     return responseDTO
