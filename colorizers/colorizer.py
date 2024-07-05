@@ -42,7 +42,7 @@ class Colorizer:
 
 
         # Define the Mean Squared Error (MSE) loss function
-        criterion = nn.MSELoss()
+        criterion = nn.CrossEntropyLoss()
 
         # Set up optimizers for both models, but only for the parameters that require gradients
         optimizer_eccv16 = optim.Adam(filter(lambda p: p.requires_grad, colorizer_eccv16.parameters()), lr=0.001)

@@ -19,7 +19,6 @@ class ColorizationDataset(Dataset):
             image = self.transform(image)
             # Permute to (H, W, C)
             image = image.permute(1, 2, 0)
-            print("Image size (H, W, C):", image.shape)
 
             # Convert to NumPy array
             image = image.numpy()
