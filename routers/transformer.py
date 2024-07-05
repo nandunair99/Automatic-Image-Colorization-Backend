@@ -31,6 +31,7 @@ async def train_model(image: ImageDTO) -> ResponseDTO:
     # You can process the image further here
     responseDTO = ResponseDTO(
         message="Model trained successfully",
+        processed_image="hahaha",
         status_code=200
     )
     return responseDTO

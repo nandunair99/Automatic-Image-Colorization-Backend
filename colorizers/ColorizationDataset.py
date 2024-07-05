@@ -17,7 +17,16 @@ class ColorizationDataset(Dataset):
         image = Image.open(img_name).convert('RGB')
         if self.transform:
             image = self.transform(image)
+            # Permute to (H, W, C)
+            image = image.permute(1, 2, 0)
+            print("Image size (H, W, C):", image.shape)
 
+            # Convert to NumPy array
+            image = image.numpy()
+
+            # Ensure the image values are in the range [0, 1]
+            if image.max() > 1.0:
+                image = image / 255.0
             # Convert to grayscale (L) and color channels (ab)
         # Convert the image to LAB color space
         image_lab = color.rgb2lab(image)
